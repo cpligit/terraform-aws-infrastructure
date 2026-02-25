@@ -67,3 +67,23 @@ resource "aws_security_group" "allow_ssh" {
     Name = "Cloud-Resume-SG"
   }
 }
+resource "aws_instance" "web_server" {
+  ami           = "ami-0c101f26f147fa7fd" # Latest Amazon Linux 2023 in us-east-1
+  instance_type = "t2.micro"
+
+  subnet_id                   = aws_subnet.public_sub.id
+  vpc_security_group_ids      = [aws_security_group.allow_ssh.id]
+  key_name                    = aws_key_pair.deployer.key_name
+  associate_public_ip_address = true
+
+  tags = {
+    Name = "Cloud-Resume-EC2"
+  }
+}
+output "instance_public_ip" {
+  value = aws_instance.web_server.public_ip
+}
+resource "aws_key_pair" "deployer" {
+  key_name   = "cloud-resume-key"
+  public_key = file("./cloud-resume-key.pub")
+}
